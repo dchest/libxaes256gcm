@@ -134,7 +134,7 @@ test_seal_open(void)
 	for (size_t i = 0; i < ARRAY_SIZE(vectors); i++) {
 		const TestVector *v = &vectors[i];
 		const char *suffix = v->kc ? "_kc" : "";
-		printf("## Test seal%s/open%s (%zu)\n", suffix, suffix, i);
+		printf("## Test ctx seal%s/open%s (%zu)\n", suffix, suffix, i);
 
 		size_t pt_len = strlen(v->plaintext);
 		size_t aad_len = strlen(v->aad);
@@ -317,8 +317,8 @@ test_seal_open(void)
 		memset(ciphertext, 0, ct_len);
 		memset(decrypted, 0, pt_len);
 
-		// test _simple variant
-		printf("## Test seal%s_simple/open%s_simple (%zu)\n", suffix,
+		// test simple variant
+		printf("## Test seal%s/open%s (%zu)\n", suffix,
 		    suffix, i);
 
 		if (v->kc)
