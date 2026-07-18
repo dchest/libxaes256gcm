@@ -1,0 +1,61 @@
+# Change this to your BoringSSL directory:
+BORINGSSL_DIR = $(HOME)/sources/boringssl
+
+# Compile it with C++ compiler just to spot any compat bugs and avoid
+# adding either -lstd++ or -lc++ to LDFLAGS depending on the platform.
+CC = g++
+CFLAGS = -O3 -flto -Wall -Wextra -DXAES256GCM_BACKEND_BORINGSSL -fstack-protector-strong -D_FORTIFY_SOURCE=3 -fPIE -fvisibility=hidden -I$(BORINGSSL_DIR)/include
+LDFLAGS = -L$(BORINGSSL_DIR)/build -lcrypto
+BUILD_DIR = build
+DIST_DIR = dist
+INCLUDE_DIR = $(DIST_DIR)/include
+
+LIB = $(DIST_DIR)/libxaes256gcm.a
+LIB_OBJS = $(BUILD_DIR)/xaes256gcm.o $(BUILD_DIR)/xaes256gcm_boringssl.o
+
+.PHONY: all test benchmark lib clean
+
+all: lib test benchmark
+
+$(BUILD_DIR) $(DIST_DIR) $(INCLUDE_DIR):
+	mkdir -p $@
+
+lib: $(LIB) $(INCLUDE_DIR)/xaes256gcm.h $(INCLUDE_DIR)/xaes256gcm_platform.h
+
+$(INCLUDE_DIR)/xaes256gcm.h: xaes256gcm.h $(INCLUDE_DIR)
+	cp xaes256gcm.h $@
+
+$(INCLUDE_DIR)/xaes256gcm_platform.h: xaes256gcm_boringssl.h $(INCLUDE_DIR)
+	cp xaes256gcm_boringssl.h $@
+
+$(BUILD_DIR)/xaes256gcm_boringssl.o: xaes256gcm_boringssl.c xaes256gcm_boringssl.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c xaes256gcm_boringssl.c -o $@
+
+$(BUILD_DIR)/xaes256gcm.o: xaes256gcm.c xaes256gcm.h xaes256gcm_internal.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c xaes256gcm.c -o $@
+
+$(BUILD_DIR)/benchmark.o: benchmark.c xaes256gcm.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c benchmark.c -o $@
+
+$(BUILD_DIR)/test.o: test.c xaes256gcm.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c test.c -o $@
+
+$(LIB): $(LIB_OBJS) $(DIST_DIR)
+	ar rcs $@ $(LIB_OBJS)
+
+$(DIST_DIR)/test: $(BUILD_DIR)/test.o $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(BUILD_DIR)/test.o $(LIB) $(LDFLAGS)
+
+$(DIST_DIR)/benchmark: $(BUILD_DIR)/benchmark.o $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(BUILD_DIR)/benchmark.o $(LIB) $(LDFLAGS)
+
+test: $(DIST_DIR)/test
+	$(DIST_DIR)/test
+
+benchmark: $(DIST_DIR)/benchmark
+
+clean:
+	rm -f $(DIST_DIR)/test $(DIST_DIR)/benchmark $(LIB)
+	rm -f $(INCLUDE_DIR)/xaes256gcm.h $(INCLUDE_DIR)/xaes256gcm_platform.h
+	rm -f $(BUILD_DIR)/*.o
+	-rmdir $(INCLUDE_DIR) $(DIST_DIR) $(BUILD_DIR) || true

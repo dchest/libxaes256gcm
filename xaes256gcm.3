@@ -1,0 +1,388 @@
+.\" Copyright (c) 2026 Dmitry Chestnykh <dmitry@codingrobots.com>
+.\" 
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.Dd July 18, 2026
+.Dt XAES256GCM 3
+.Os
+.Sh NAME
+.Nm xaes256gcm_ctx_init ,
+.Nm xaes256gcm_ctx_destroy ,
+.Nm xaes256gcm_ctx_seal ,
+.Nm xaes256gcm_ctx_open ,
+.Nm xaes256gcm_ctx_seal_kc ,
+.Nm xaes256gcm_ctx_open_kc ,
+.Nm xaes256gcm_seal ,
+.Nm xaes256gcm_open ,
+.Nm xaes256gcm_seal_kc ,
+.Nm xaes256gcm_open_kc ,
+.Nm xaes256gcm_rand_nonce
+.Nd XAES-256-GCM extended-nonce authenticated encryption with associated data
+.Sh LIBRARY
+.Lb libxaes256gcm
+.Sh SYNOPSIS
+.In xaes256gcm.h
+.Fd #define XAES256GCM_KEY_SIZE
+.Fd #define XAES256GCM_NONCE_SIZE
+.Fd #define XAES256GCM_OVERHEAD
+.Fd #define XAES256GCM_KC_OVERHEAD
+.Fd #define XAES256GCM_AAD_MAX
+.Fd #define XAES256GCM_PLAINTEXT_MAX
+.Ft int
+.Fo xaes256gcm_ctx_init
+.Fa "struct xaes256gcm_ctx *c"
+.Fa "const uint8_t key[32]"
+.Fc
+.Ft void
+.Fo xaes256gcm_ctx_destroy
+.Fa "struct xaes256gcm_ctx *c"
+.Fc
+.Ft int
+.Fo xaes256gcm_ctx_seal
+.Fa "struct xaes256gcm_ctx *c"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *plaintext"
+.Fa "size_t plaintext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *ciphertext"
+.Fa "size_t ciphertext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_ctx_open
+.Fa "struct xaes256gcm_ctx *c"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *ciphertext"
+.Fa "size_t ciphertext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *plaintext"
+.Fa "size_t plaintext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_ctx_seal_kc
+.Fa "struct xaes256gcm_ctx *c"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *plaintext"
+.Fa "size_t plaintext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *ciphertext"
+.Fa "size_t ciphertext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_ctx_open_kc
+.Fa "struct xaes256gcm_ctx *c"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *ciphertext"
+.Fa "size_t ciphertext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *plaintext"
+.Fa "size_t plaintext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_seal
+.Fa "const uint8_t key[32]"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *plaintext"
+.Fa "size_t plaintext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *ciphertext"
+.Fa "size_t ciphertext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_open
+.Fa "const uint8_t key[32]"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *ciphertext"
+.Fa "size_t ciphertext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *plaintext"
+.Fa "size_t plaintext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_seal_kc
+.Fa "const uint8_t key[32]"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *plaintext"
+.Fa "size_t plaintext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *ciphertext"
+.Fa "size_t ciphertext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_open_kc
+.Fa "const uint8_t key[32]"
+.Fa "const uint8_t nonce[24]"
+.Fa "const uint8_t *ciphertext"
+.Fa "size_t ciphertext_len"
+.Fa "const uint8_t *aad"
+.Fa "size_t aad_len"
+.Fa "uint8_t *plaintext"
+.Fa "size_t plaintext_max_len"
+.Fc
+.Ft int
+.Fo xaes256gcm_rand_nonce
+.Fa "uint8_t nonce[24]"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm libxaes256gcm
+library implements XAES-256-GCM, an extended-nonce authenticated encryption
+with associated data (AEAD) algorithm, and its key-committing variant
+KC-XAES-256-GCM.
+.Pp
+Both variants are compatible with NIST standards and can be considered a
+composition of key derivation using the standard CMAC-based KDF and
+AES-256-GCM.
+.Pp
+The 192-bit nonce makes random nonces safe to use, avoiding the catastrophic
+consequences of nonce reuse that affect AES-256-GCM with 96-bit nonce.
+.Pp
+The key-committing variant binds each ciphertext to one specific key,
+preventing attacks where an adversary can generate a single ciphertext that
+decrypts successfully under multiple keys into different plaintexts.
+.Pp
+The following constants are defined:
+.Bl -tag -width Ds
+.It Dv XAES256GCM_KEY_SIZE
+Key length in bytes (32).
+.It Dv XAES256GCM_NONCE_SIZE
+Nonce length in bytes (24).
+.It Dv XAES256GCM_OVERHEAD
+Ciphertext overhead in bytes: the 16-byte authentication tag.
+.It Dv XAES256GCM_KC_OVERHEAD
+Ciphertext overhead in bytes for the key-committing variant: the 16-byte
+authentication tag plus a 32-byte key commitment tag (48 bytes total).
+.It Dv XAES256GCM_AAD_MAX
+Maximum size of associated data in bytes (minimum of 2^61 - 1 and SIZE_MAX).
+.It Dv XAES256GCM_PLAINTEXT_MAX
+Maximum size of plaintext in bytes (minimum of 2^36 - 32 and SIZE_MAX - 48).
+.El
+.Pp
+.Fn xaes256gcm_ctx_init
+initializes the XAES-256-GCM context
+.Fa c
+with the 32-byte secret
+.Fa key .
+.Pp
+Each seal and open operation is semantically independent,
+but the context is not thread-safe: each thread should use its own context.
+.Pp
+.Fn xaes256gcm_ctx_destroy
+disposes of the context
+.Fa c .
+.Pp
+.Fn xaes256gcm_ctx_seal
+encrypts and authenticates
+.Fa plaintext
+of length
+.Fa plaintext_len ,
+authenticates the optional additional data
+.Fa aad
+of length
+.Fa aad_len ,
+and writes the result to
+.Fa ciphertext .
+.Fa ciphertext_max_len
+indicates the space available, which must be at least
+.Fa plaintext_len
++
+.Dv XAES256GCM_OVERHEAD .
+The
+.Fa nonce
+must be unique for this key.
+It does not need to be random or unpredictable; however, random nonces
+are allowed.
+Reusing a nonce with the same key breaks confidentiality and authenticity.
+.Pp
+.Fn xaes256gcm_ctx_open
+verifies the authentication tag in
+.Fa ciphertext
+and decrypts it.
+.Fa plaintext_max_len
+indicates the space available, which must be at least
+.Fa ciphertext_len
+\-
+.Dv XAES256GCM_OVERHEAD .
+.Fa nonce
+and
+.Fa aad
+must be the same as given to the seal function.
+.Pp
+.Fn xaes256gcm_ctx_seal_kc
+is the same as
+.Fn xaes256gcm_ctx_seal
+but also appends a 32-byte key commitment tag after the authentication tag.
+.Fa ciphertext_max_len
+must be at least
+.Fa plaintext_len
++
+.Dv XAES256GCM_KC_OVERHEAD .
+.Pp
+.Fn xaes256gcm_ctx_open_kc
+is the same as
+.Fn xaes256gcm_ctx_open
+but also verifies the key commitment.
+.Fa plaintext_max_len
+must be at least
+.Fa ciphertext_len
+\-
+.Dv XAES256GCM_KC_OVERHEAD .
+.Pp
+.Fn xaes256gcm_seal ,
+.Fn xaes256gcm_open ,
+.Fn xaes256gcm_seal_kc ,
+and
+.Fn xaes256gcm_open_kc
+are convenience functions that combine
+.Fn xaes256gcm_ctx_init ,
+the corresponding seal or open operation, and
+.Fn xaes256gcm_ctx_destroy
+in a single call.
+.Pp
+.Fn xaes256gcm_rand_nonce
+generates a random 24-byte nonce using the CSPRNG.
+.Sh RETURN VALUES
+All functions, except for
+.Fn xaes256gcm_ctx_destroy ,
+return 0 on success or nonzero on error.
+.Sh EXAMPLES
+This example encrypts and decrypts an ASCII string
+"Hello world!" using an all-zero key and a random nonce:
+.Bd -literal -offset indent
+#include <string.h>
+#include <stdio.h>
+
+#include <xaes256gcm.h>
+
+int main(void)
+{
+    uint8_t key[32] = {0}; // fill with an actual secret key
+    uint8_t nonce[24];
+    uint8_t plaintext[] = "Hello, world!"; // includes NUL
+    uint8_t ciphertext[sizeof(plaintext) - 1 + XAES256GCM_OVERHEAD];
+    uint8_t decrypted[sizeof(plaintext)] = {0};
+    uint8_t aad[] = "metadata"; // includes NUL
+
+    struct xaes256gcm_ctx c;
+
+    // Initialize context.
+    if (xaes256gcm_ctx_init(&c, key) != 0) {
+        fprintf(stderr, "init failed\en");
+        return 1;
+    }
+
+    // Generate a random nonce.
+    if (xaes256gcm_rand_nonce(nonce) != 0) {
+        fprintf(stderr, "nonce generation failed\en");
+        xaes256gcm_ctx_destroy(&c);
+        return 1;
+    }
+
+    // Encrypt.
+    if (xaes256gcm_ctx_seal(&c, nonce,
+            plaintext, sizeof(plaintext) - 1,
+            aad, sizeof(aad) - 1,
+            ciphertext, sizeof(ciphertext)) != 0) {
+        fprintf(stderr, "encryption failed\en");
+        xaes256gcm_ctx_destroy(&c);
+        return 1;
+    }
+
+    // Decrypt.
+    if (xaes256gcm_ctx_open(&c, nonce,
+            ciphertext, sizeof(ciphertext),
+            aad, sizeof(aad) - 1,
+            decrypted, sizeof(decrypted)) != 0) {
+        fprintf(stderr, "decryption failed\en");
+        xaes256gcm_ctx_destroy(&c);
+        return 2;
+    }
+
+    printf("%s\en", decrypted); // "Hello, world!"
+
+    xaes256gcm_ctx_destroy(&c);
+    return 0;
+}
+.Ed
+.Sh ERRORS
+.Fn xaes256gcm_ctx_init
+returns nonzero if the underlying crypto backend failed to initialize.
+.Pp
+.Fn xaes256gcm_ctx_seal ,
+.Fn xaes256gcm_ctx_seal_kc ,
+.Fn xaes256gcm_seal ,
+.Fn xaes256gcm_seal_kc
+return nonzero if the underlying crypto backend failed to encrypt, or if the input
+bounds are not satisfied. On error, the state of the resulting ciphertext is
+undefined.
+.Pp
+.Fn xaes256gcm_ctx_open ,
+.Fn xaes256gcm_ctx_open_kc ,
+.Fn xaes256gcm_open ,
+.Fn xaes256gcm_open_kc
+return nonzero if the underlying crypto backend failed to decrypt, the input bounds
+are not satisfied, key commitment verification failed (key-committing variants
+only), or ciphertext authentication failed. On error, the resulting plaintext
+is undefined and may be overwritten with zeros, but will not contain partially
+decrypted data if authentication fails.
+.Pp
+.Fn xaes256gcm_rand_nonce
+returns nonzero if the underlying crypto backend failed to generate random bytes.
+.Sh STANDARDS
+.Bl -tag -width Ds
+.It c2sp.org/XAES-256-GCM
+The XAES-256-GCM extended-nonce AEAD.
+.It NIST SP 800-108r1
+Recommendation for Key Derivation Using Pseudorandom Functions.
+.It NIST SP 800-38D
+Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM)
+and GMAC.
+.It NIST SP 800-38B
+Recommendation for Block Cipher Modes of Operation: the CMAC Mode for
+Authentication.
+.It FIPS PUB 197
+Advanced Encryption Standard (AES).
+.El
+.Sh HISTORY
+Written in 2026 based on the
+.Lk https://c2sp.org/XAES-256-GCM "XAES-256-GCM specification"
+published in 2024 by
+Filippo Valsorda and
+the KC-XAES-256-GCM paper 
+.Lk https://eprint.iacr.org/2025/758 "Key Commitment for Nonce-Derived Schemes"
+published in 2025 by Panos
+Kampanakis, Shai Halevi, Nevine Ebeid, and Matt Campagna.
+.Sh AUTHORS
+.An Dmitry Chestnykh Aq Mt dmitry@codingrobots.com
+.Sh CAVEATS
+Nonce reuse breaks both confidentiality and authenticity.
+Every key and nonce pair must be unique.
+The 192-bit nonce makes random nonce generation safe for this purpose.
+.Pp
+The key must be uniformly random. When using a password, a suitable
+password-based key derivation function must be used to derive it.
+.Pp
+Cannot be used for large file or stream encryption in a single call: a
+cryptographic chunked encryption protocol must be used to split streams into
+sealed packets.
+.Pp
+.Sh BUGS
+There is no way to distinguish authentication failures from the backend
+failures when opening ciphertexts. This is deliberate. Normally, after the
+context is successfully allocated, no other failures are expected from the
+backend.

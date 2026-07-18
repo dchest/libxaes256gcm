@@ -1,0 +1,57 @@
+CFLAGS = -O3 -flto -Wall -Wextra -Wconversion -std=c23 -DXAES256GCM_BACKEND_APPLE -fstack-protector-strong -fPIE -fvisibility=hidden
+BUILD_DIR = build
+DIST_DIR = dist
+INCLUDE_DIR = $(DIST_DIR)/include
+
+LIB = $(DIST_DIR)/libxaes256gcm.a
+LIB_OBJS = $(BUILD_DIR)/xaes256gcm.o $(BUILD_DIR)/xaes256gcm_apple.o $(BUILD_DIR)/xaes256gcm_apple_shim.o
+
+.PHONY: all test benchmark lib clean
+
+all: lib test benchmark
+
+$(BUILD_DIR) $(DIST_DIR) $(INCLUDE_DIR):
+	mkdir -p $@
+
+lib: $(LIB) $(INCLUDE_DIR)/xaes256gcm.h $(INCLUDE_DIR)/xaes256gcm_platform.h
+
+$(INCLUDE_DIR)/xaes256gcm.h: xaes256gcm.h $(INCLUDE_DIR)
+	cp xaes256gcm.h $@
+
+$(INCLUDE_DIR)/xaes256gcm_platform.h: xaes256gcm_apple.h $(INCLUDE_DIR)
+	cp xaes256gcm_apple.h $@
+
+$(BUILD_DIR)/xaes256gcm_apple_shim.o: xaes256gcm_apple_shim.swift $(BUILD_DIR)
+	swiftc -parse-as-library -c -O xaes256gcm_apple_shim.swift -o $@
+
+$(BUILD_DIR)/xaes256gcm_apple.o: xaes256gcm_apple.c xaes256gcm_apple.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c xaes256gcm_apple.c -o $@
+
+$(BUILD_DIR)/xaes256gcm.o: xaes256gcm.c xaes256gcm.h xaes256gcm_internal.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c xaes256gcm.c -o $@
+
+$(BUILD_DIR)/benchmark.o: benchmark.c xaes256gcm.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -fbounds-safety -c benchmark.c -o $@
+
+$(BUILD_DIR)/test.o: test.c xaes256gcm.h $(BUILD_DIR)
+	$(CC) $(CFLAGS) -fbounds-safety -c test.c -o $@
+
+$(LIB): $(LIB_OBJS) $(DIST_DIR)
+	ar rcs $@ $(LIB_OBJS)
+
+$(DIST_DIR)/test: $(BUILD_DIR)/test.o $(LIB)
+	swiftc -O -o $@ $(BUILD_DIR)/test.o $(LIB) -framework CryptoKit
+
+$(DIST_DIR)/benchmark: $(BUILD_DIR)/benchmark.o $(LIB)
+	swiftc -O -o $@ $(BUILD_DIR)/benchmark.o $(LIB) -framework CryptoKit
+
+test: $(DIST_DIR)/test
+	$(DIST_DIR)/test
+
+benchmark: $(DIST_DIR)/benchmark
+
+clean:
+	rm -f $(DIST_DIR)/test $(DIST_DIR)/benchmark $(LIB)
+	rm -f $(INCLUDE_DIR)/xaes256gcm.h $(INCLUDE_DIR)/xaes256gcm_platform.h
+	rm -f $(BUILD_DIR)/*.o
+	-rmdir $(INCLUDE_DIR) $(DIST_DIR) $(BUILD_DIR) || true
