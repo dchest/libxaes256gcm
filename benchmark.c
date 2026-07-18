@@ -149,8 +149,8 @@ main(void)
 {
 	benchmark_seal("silent", 8 * 1024, ITERATIONS); /* warmup */
 
-	printf("XAES-256-GCM seal benchmark\n");
-	printf("===========================\n\n");
+	printf("XAES-256-GCM cxt seal benchmark\n");
+	printf("===============================\n\n");
 
 	benchmark_seal("128 B", 128, SMALL_ITERATIONS);
 	benchmark_seal("1 KiB", 1024, SMALL_ITERATIONS);
@@ -160,8 +160,8 @@ main(void)
 
 	benchmark_seal_simple("silent", 8 * 1024, ITERATIONS); /* warmup */
 
-	printf("\nXAES-256-GCM seal_simple benchmark\n");
-	printf("=====================================\n\n");
+	printf("\nXAES-256-GCM seal benchmark\n");
+	printf("===========================\n\n");
 
 	benchmark_seal_simple("128 B", 128, SMALL_ITERATIONS);
 	benchmark_seal_simple("1 KiB", 1024, SMALL_ITERATIONS);
@@ -171,8 +171,8 @@ main(void)
 
 	benchmark_seal_kc("silent", 8 * 1024, ITERATIONS); /* warmup */
 
-	printf("\nKC-XAES-256-GCM kc_seal benchmark\n");
-	printf("===================================\n\n");
+	printf("\nKC-XAES-256-GCM ctx seal_kc benchmark\n");
+	printf("=====================================\n\n");
 
 	benchmark_seal_kc("128 B", 128, SMALL_ITERATIONS);
 	benchmark_seal_kc("1 KiB", 1024, SMALL_ITERATIONS);
@@ -182,8 +182,8 @@ main(void)
 
 	benchmark_seal_kc_simple("silent", 8 * 1024, ITERATIONS); /* warmup */
 
-	printf("\nKC-XAES-256-GCM kc_seal_simple benchmark\n");
-	printf("===========================================\n\n");
+	printf("\nKC-XAES-256-GCM seal_kc benchmark\n");
+	printf("=================================\n\n");
 
 	benchmark_seal_kc_simple("128 B", 128, SMALL_ITERATIONS);
 	benchmark_seal_kc_simple("1 KiB", 1024, SMALL_ITERATIONS);
