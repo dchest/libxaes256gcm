@@ -318,8 +318,7 @@ test_seal_open(void)
 		memset(decrypted, 0, pt_len);
 
 		// test simple variant
-		printf("## Test seal%s/open%s (%zu)\n", suffix,
-		    suffix, i);
+		printf("## Test seal%s/open%s (%zu)\n", suffix, suffix, i);
 
 		if (v->kc)
 			r = xaes256gcm_seal_kc(v->key, v->nonce, plaintext,
