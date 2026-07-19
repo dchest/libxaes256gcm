@@ -120,8 +120,8 @@ static const TestVector vectors[] = {
         .nonce = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X'},
         .plaintext = "XAES-256-GCM",
         .aad = "",
-        .ciphertext_hex = "ce546ef63c9cc60765923609b33a9a1974e96e52daf2fcf7075e227104076b6085"
-                          "eebab138855fe57811c04112eff989d44120dfff662d5475a383c3",
+        .ciphertext_hex = "ce546ef63c9cc60765923609b33a9a1974e96e52daf2fcf7075e2271"
+                          "04076b6085eebab138855fe57811c04112eff989d44120dfff662d5475a383c3",
     },
 };
 // clang-format on
